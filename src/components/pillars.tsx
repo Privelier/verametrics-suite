@@ -1,3 +1,5 @@
+import { AssessmentSlot } from "@/components/assessment-slot";
+
 const pillars = [
   {
     id: "01",
@@ -35,30 +37,6 @@ const pillars = [
     signals: ["Concession curve", "Status defense", "Frame control"],
   },
 ];
-
-function TestSlot({ name }: { name: string }) {
-  return (
-    <div
-      data-test-slot={name}
-      className="mt-5 rounded-md border border-dashed border-primary/45 bg-primary/5 p-4"
-    >
-      {/* CLAUDE_CODE_TEST_SLOT: injected test cases render here */}
-      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">
-        CLAUDE_CODE_TEST_SLOT: {name} (Easy, Moderate, Hard)
-      </p>
-      <div className="mt-3 grid grid-cols-3 gap-2">
-        {["Easy", "Moderate", "Hard"].map((level) => (
-          <div
-            key={level}
-            className="rounded border border-dashed border-border px-2 py-3 text-center text-[11px] text-muted-foreground"
-          >
-            {level}
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 export function Pillars() {
   return (
@@ -106,7 +84,7 @@ export function Pillars() {
                 ))}
               </div>
 
-              <TestSlot name={pillar.name} />
+              <AssessmentSlot name={pillar.name} />
             </article>
           ))}
         </div>
