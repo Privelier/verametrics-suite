@@ -1,5 +1,5 @@
 const candidates = [
-  { name: "A.Варга", role: "VP Engineering", resilience: 92, thinking: 88, badge: "Verified" },
+  { name: "A. Varga", role: "VP Engineering", resilience: 92, thinking: 88, badge: "Verified" },
   { name: "M. Okonkwo", role: "Director, Risk", resilience: 84, thinking: 91, badge: "Verified" },
   { name: "S. Lindqvist", role: "Head of Platform", resilience: 71, thinking: 76, badge: "In review" },
   { name: "R. Delgado", role: "Chief of Staff", resilience: 64, thinking: 69, badge: "Pending" },
