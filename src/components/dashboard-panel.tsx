@@ -1,90 +1,206 @@
-const candidates = [
-  { name: "A. Varga", role: "VP Engineering", resilience: 92, thinking: 88, badge: "Verified" },
-  { name: "M. Okonkwo", role: "Director, Risk", resilience: 84, thinking: 91, badge: "Verified" },
-  { name: "S. Lindqvist", role: "Head of Platform", resilience: 71, thinking: 76, badge: "In review" },
-  { name: "R. Delgado", role: "Chief of Staff", resilience: 64, thinking: 69, badge: "Pending" },
-  { name: "T. Nakamura", role: "SVP Operations", resilience: 88, thinking: 82, badge: "Verified" },
+import { DIMENSIONS, GRADE_BANDS } from "@/data/framework";
+import { cn } from "@/lib/utils";
+
+/**
+ * Registrar workspace.
+ *
+ * A cohort return, set as a statistical abstract rather than as a product
+ * dashboard: hairline rules, tabular figures, no colour beyond the single blue.
+ * Candidates are shown by candidate number, because the registrar's view of a
+ * cohort is not a view of named people.
+ */
+
+type SourceTier = "Primary" | "Secondary" | "None";
+
+interface CohortRow {
+  number: string;
+  specialisation: string;
+  /** Dimension marks in paper order: I, II, III, IV, V. */
+  marks: [number, number, number, number, number];
+  tier: SourceTier;
+  flag?: string;
+}
+
+const COHORT: CohortRow[] = [
+  {
+    number: "ENG/2611",
+    specialisation: "Chemical and Process",
+    marks: [178, 171, 152, 219, 121],
+    tier: "Primary",
+  },
+  {
+    number: "ENG/2614",
+    specialisation: "Electrical and Control",
+    marks: [161, 148, 139, 186, 108],
+    tier: "Primary",
+  },
+  {
+    number: "ENG/2619",
+    specialisation: "Civil and Structural",
+    marks: [140, 126, 131, 158, 96],
+    tier: "Secondary",
+  },
+  {
+    number: "ENG/2623",
+    specialisation: "Computer and Software",
+    marks: [155, 163, 118, 171, 89],
+    tier: "Secondary",
+    flag: "Citation probe unresolved — Part II",
+  },
+  {
+    number: "ENG/2628",
+    specialisation: "Mechanical",
+    marks: [121, 109, 104, 142, 74],
+    tier: "None",
+    flag: "Capped at Pass — no external source reached",
+  },
+  {
+    number: "ENG/2634",
+    specialisation: "Chemical and Process",
+    marks: [149, 138, 166, 176, 118],
+    tier: "Primary",
+  },
 ];
 
-const badgeTone: Record<string, string> = {
-  Verified: "border-primary/40 bg-primary/10 text-primary",
-  "In review": "border-accent/40 bg-accent/10 text-accent",
-  Pending: "border-border bg-secondary/60 text-muted-foreground",
-};
+function total(row: CohortRow): number {
+  return row.marks.reduce((sum, m) => sum + m, 0);
+}
 
-function Meter({ value }: { value: number }) {
+function bandFor(score: number): string {
+  return GRADE_BANDS.find((b) => score >= b.lower)?.band ?? "Referred";
+}
+
+/** Horizontal rule-bar. Blue for the value, hairline for the remainder. */
+function Bar({
+  value,
+  max,
+  tone = "primary",
+}: {
+  value: number;
+  max: number;
+  tone?: "primary" | "ink";
+}) {
+  const pct = Math.max(0, Math.min(100, (value / max) * 100));
   return (
-    <div className="flex min-w-0 items-center gap-2">
-      <div className="h-1.5 w-full min-w-12 overflow-hidden rounded-full bg-secondary">
-        <div
-          className="h-full rounded-full bg-primary"
-          style={{ width: `${value}%` }}
+    <span className="flex items-center gap-3">
+      <span className="relative block h-[3px] w-full min-w-10 bg-rule">
+        <span
+          className={cn(
+            "absolute inset-y-0 left-0 block",
+            tone === "primary" ? "bg-primary" : "bg-foreground",
+          )}
+          style={{ width: `${pct}%` }}
         />
-      </div>
-      <span className="w-8 shrink-0 text-right font-mono text-xs text-muted-foreground">
+      </span>
+      <span className="w-9 shrink-0 text-right text-[11.5px] tabular-nums text-muted-foreground">
         {value}
       </span>
-    </div>
+    </span>
   );
 }
 
 export function DashboardPanel({ compact = false }: { compact?: boolean }) {
+  const cohortMean = Math.round(COHORT.reduce((s, r) => s + total(r), 0) / COHORT.length);
+  const primaryShare = Math.round(
+    (COHORT.filter((r) => r.tier === "Primary").length / COHORT.length) * 100,
+  );
+
   return (
-    <div className="space-y-5">
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="space-y-14">
+      <dl className="grid border-t border-rule-strong sm:grid-cols-2 lg:grid-cols-4">
         {[
-          ["Active candidates", "1,284", "+8.2% vs last cycle"],
-          ["Mean resilience index", "78.6", "Cohort percentile 71"],
-          ["Critical thinking score", "812", "Institute scale 0–1000"],
-          ["Badges issued", "347", "12 awaiting attestation"],
-        ].map(([label, value, sub]) => (
-          <div key={label} className="glass-panel rounded-xl p-5">
-            <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{label}</p>
-            <p className="mt-3 text-3xl font-bold tracking-tight">{value}</p>
-            <p className="mt-1 text-xs text-muted-foreground">{sub}</p>
+          ["Scripts marked", "184", "of 197 sat"],
+          ["Cohort mean", String(cohortMean), "Institute 1000-mark scale"],
+          ["Reached primary sources", `${primaryShare}%`, "Research dimension"],
+          ["Integrity referrals", "3", "To the institution's officer"],
+        ].map(([label, value, note]) => (
+          <div
+            key={label}
+            className="border-b border-rule py-6 pr-6 sm:border-r sm:last:border-r-0"
+          >
+            <dt className="text-[10.5px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+              {label}
+            </dt>
+            <dd>
+              <span className="mt-3 block font-serif text-[1.75rem] leading-none tracking-tight tabular-nums">
+                {value}
+              </span>
+              <span className="mt-3 block text-[12.5px] text-muted-foreground">{note}</span>
+            </dd>
           </div>
         ))}
-      </div>
+      </dl>
 
-      <div className="grid gap-5 lg:grid-cols-3">
-        <div className="glass-panel rounded-xl p-6 lg:col-span-2">
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-4">
-            <h3 className="min-w-0 truncate text-sm font-semibold tracking-tight">
-              Candidate certification pipeline
-            </h3>
-            <span className="shrink-0 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
-              Q3 cohort
-            </span>
+      <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,19rem)] lg:gap-16">
+        <section className="min-w-0">
+          <div className="flex flex-wrap items-baseline justify-between gap-4 border-b-2 border-foreground pb-3">
+            <h3 className="text-[15px] font-semibold tracking-tight">Candidate returns</h3>
+            <p className="ref text-muted-foreground">Faculty of Engineering · specimen extract</p>
           </div>
 
-          <div className="mt-5 overflow-x-auto">
-            <table className="w-full min-w-140 text-sm">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[46rem] border-collapse text-left">
               <thead>
-                <tr className="text-left text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
-                  <th className="pb-3 font-medium">Candidate</th>
-                  <th className="pb-3 font-medium">Resilience</th>
-                  <th className="pb-3 font-medium">Critical thinking</th>
-                  <th className="pb-3 font-medium">Badge</th>
+                <tr className="border-b border-rule">
+                  <th className="w-[9rem] py-3 pr-5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                    Candidate
+                  </th>
+                  {DIMENSIONS.map((d) => (
+                    <th
+                      key={d.code}
+                      className="w-[3.4rem] py-3 pr-3 text-right text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground"
+                      title={d.title}
+                    >
+                      {d.numeral}
+                    </th>
+                  ))}
+                  <th className="w-[4.5rem] py-3 pr-5 text-right text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                    Total
+                  </th>
+                  <th className="w-[6rem] py-3 pr-4 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                    Band
+                  </th>
+                  <th className="w-[5.5rem] py-3 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                    Sources
+                  </th>
                 </tr>
               </thead>
               <tbody>
-                {candidates.map((c) => (
-                  <tr key={c.name} className="border-t border-border/60">
-                    <td className="py-3.5 pr-6">
-                      <p className="font-medium">{c.name}</p>
-                      <p className="text-xs text-muted-foreground">{c.role}</p>
+                {COHORT.map((row) => (
+                  <tr key={row.number} className="border-b border-rule align-top">
+                    <td className="py-4 pr-5">
+                      <span className="ref block">{row.number}</span>
+                      <span className="mt-1.5 block text-[12px] text-muted-foreground">
+                        {row.specialisation}
+                      </span>
+                      {row.flag ? (
+                        <span className="mt-2 block border-l-2 border-foreground pl-2.5 text-[11.5px] leading-snug text-muted-foreground">
+                          {row.flag}
+                        </span>
+                      ) : null}
                     </td>
-                    <td className="w-40 py-3.5 pr-6">
-                      <Meter value={c.resilience} />
-                    </td>
-                    <td className="w-40 py-3.5 pr-6">
-                      <Meter value={c.thinking} />
-                    </td>
-                    <td className="py-3.5">
-                      <span
-                        className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] ${badgeTone[c.badge]}`}
+                    {row.marks.map((mark, i) => (
+                      <td
+                        key={DIMENSIONS[i]?.code ?? i}
+                        className="py-4 pr-3 text-right text-[12.5px] tabular-nums"
                       >
-                        {c.badge}
+                        {mark}
+                      </td>
+                    ))}
+                    <td className="py-4 pr-5 text-right text-[12.5px] font-semibold tabular-nums">
+                      {total(row)}
+                    </td>
+                    <td className="py-4 pr-4 text-[12.5px]">{bandFor(total(row))}</td>
+                    <td className="py-4">
+                      <span
+                        className={cn(
+                          "inline-flex border px-2 py-1 text-[10.5px] font-semibold uppercase tracking-[0.1em]",
+                          row.tier === "Primary" && "border-primary text-primary",
+                          row.tier === "Secondary" && "border-rule-strong text-foreground",
+                          row.tier === "None" && "border-rule text-muted-foreground",
+                        )}
+                      >
+                        {row.tier}
                       </span>
                     </td>
                   </tr>
@@ -92,63 +208,52 @@ export function DashboardPanel({ compact = false }: { compact?: boolean }) {
               </tbody>
             </table>
           </div>
-        </div>
 
-        <div className="glass-panel rounded-xl p-6">
-          <h3 className="text-sm font-semibold tracking-tight">Pillar distribution</h3>
-          <ul className="mt-5 space-y-4">
-            {[
-              ["Ambiguity & Chaos", 81],
-              ["Red-Teaming", 74],
-              ["Ethical Integrity", 88],
-              ["Cascading Failure", 66],
-              ["Adversarial Negotiation", 72],
-            ].map(([label, value]) => (
-              <li key={label as string}>
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span className="min-w-0 truncate pr-3">{label}</span>
-                  <span className="shrink-0 font-mono">{value}</span>
-                </div>
-                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-secondary">
-                  <div
-                    className="h-full rounded-full bg-accent"
-                    style={{ width: `${value}%` }}
-                  />
-                </div>
-              </li>
-            ))}
+          <p className="mt-5 text-[12px] leading-relaxed text-muted-foreground">
+            Columns I to V are the dimension sub-scores. Candidates are identified by number; the
+            registrar&rsquo;s view of a cohort is not a view of named people, and release of any
+            return to a third party requires the candidate&rsquo;s specific consent per recipient.
+          </p>
+        </section>
+
+        <aside>
+          <div className="border-b-2 border-foreground pb-3">
+            <h3 className="text-[15px] font-semibold tracking-tight">Dimension means</h3>
+          </div>
+          <ul className="mt-6 space-y-5">
+            {DIMENSIONS.map((d, i) => {
+              const mean = Math.round(
+                COHORT.reduce((s, r) => s + (r.marks[i] ?? 0), 0) / COHORT.length,
+              );
+              return (
+                <li key={d.code}>
+                  <div className="flex items-baseline justify-between gap-4">
+                    <span className="ref text-primary">{d.numeral}</span>
+                    <span className="min-w-0 flex-1 truncate text-[12.5px]">{d.title}</span>
+                  </div>
+                  <div className="mt-2.5">
+                    <Bar value={mean} max={d.marks} />
+                  </div>
+                  <p className="mt-1.5 text-[11px] text-muted-foreground">of {d.marks} available</p>
+                </li>
+              );
+            })}
           </ul>
 
-          {!compact && (
-            <div className="mt-6 rounded-lg border border-border/70 bg-surface-deep/70 p-4">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                Attestation queue
-              </p>
-              <p className="mt-2 text-sm text-muted-foreground">
-                12 certifications awaiting executive counter-signature.
+          {!compact ? (
+            <div className="mt-10 border-t border-rule pt-6">
+              <p className="eyebrow">Board of examiners</p>
+              <p className="mt-4 text-[13px] leading-relaxed text-muted-foreground">
+                Seven scripts await third-marker adjudication, each differing by more than one band
+                between the two independent markers. Part III accounts for five of the seven, which
+                is the expected pattern: professional-duty scripts mark less consistently than
+                technical ones, and the divergence is reported to the Institute rather than resolved
+                by averaging.
               </p>
             </div>
-          )}
-        </div>
+          ) : null}
+        </aside>
       </div>
     </div>
-  );
-}
-
-export function DashboardPreview() {
-  return (
-    <section className="border-b border-border/60">
-      <div className="mx-auto max-w-7xl px-5 py-20">
-        <div className="max-w-2xl">
-          <p className="text-xs uppercase tracking-[0.25em] text-accent">Enterprise Dashboard</p>
-          <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
-            One command surface for HR and executives
-          </h2>
-        </div>
-        <div className="mt-12">
-          <DashboardPanel compact />
-        </div>
-      </div>
-    </section>
   );
 }

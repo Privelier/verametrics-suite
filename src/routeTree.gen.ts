@@ -11,6 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as FacultiesRouteImport } from './routes/faculties'
+import { Route as ProgrammeRouteImport } from './routes/programme'
+import { Route as UniversitiesRouteImport } from './routes/universities'
+import { Route as AnswerKeyPaperIdRouteImport } from './routes/answer-key.$paperId'
+import { Route as PaperPaperIdRouteImport } from './routes/paper.$paperId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -22,31 +27,98 @@ const DashboardRoute = DashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
+const FacultiesRoute = FacultiesRouteImport.update({
+  id: '/faculties',
+  path: '/faculties',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProgrammeRoute = ProgrammeRouteImport.update({
+  id: '/programme',
+  path: '/programme',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const UniversitiesRoute = UniversitiesRouteImport.update({
+  id: '/universities',
+  path: '/universities',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AnswerKeyPaperIdRoute = AnswerKeyPaperIdRouteImport.update({
+  id: '/answer-key/$paperId',
+  path: '/answer-key/$paperId',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaperPaperIdRoute = PaperPaperIdRouteImport.update({
+  id: '/paper/$paperId',
+  path: '/paper/$paperId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/faculties': typeof FacultiesRoute
+  '/programme': typeof ProgrammeRoute
+  '/universities': typeof UniversitiesRoute
+  '/answer-key/$paperId': typeof AnswerKeyPaperIdRoute
+  '/paper/$paperId': typeof PaperPaperIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/faculties': typeof FacultiesRoute
+  '/programme': typeof ProgrammeRoute
+  '/universities': typeof UniversitiesRoute
+  '/answer-key/$paperId': typeof AnswerKeyPaperIdRoute
+  '/paper/$paperId': typeof PaperPaperIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/dashboard': typeof DashboardRoute
+  '/faculties': typeof FacultiesRoute
+  '/programme': typeof ProgrammeRoute
+  '/universities': typeof UniversitiesRoute
+  '/answer-key/$paperId': typeof AnswerKeyPaperIdRoute
+  '/paper/$paperId': typeof PaperPaperIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/dashboard'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/faculties'
+    | '/programme'
+    | '/universities'
+    | '/answer-key/$paperId'
+    | '/paper/$paperId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/dashboard'
-  id: '__root__' | '/' | '/dashboard'
+  to:
+    | '/'
+    | '/dashboard'
+    | '/faculties'
+    | '/programme'
+    | '/universities'
+    | '/answer-key/$paperId'
+    | '/paper/$paperId'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/faculties'
+    | '/programme'
+    | '/universities'
+    | '/answer-key/$paperId'
+    | '/paper/$paperId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   DashboardRoute: typeof DashboardRoute
+  FacultiesRoute: typeof FacultiesRoute
+  ProgrammeRoute: typeof ProgrammeRoute
+  UniversitiesRoute: typeof UniversitiesRoute
+  AnswerKeyPaperIdRoute: typeof AnswerKeyPaperIdRoute
+  PaperPaperIdRoute: typeof PaperPaperIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -65,12 +137,52 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/faculties': {
+      id: '/faculties'
+      path: '/faculties'
+      fullPath: '/faculties'
+      preLoaderRoute: typeof FacultiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/programme': {
+      id: '/programme'
+      path: '/programme'
+      fullPath: '/programme'
+      preLoaderRoute: typeof ProgrammeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/universities': {
+      id: '/universities'
+      path: '/universities'
+      fullPath: '/universities'
+      preLoaderRoute: typeof UniversitiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/answer-key/$paperId': {
+      id: '/answer-key/$paperId'
+      path: '/answer-key/$paperId'
+      fullPath: '/answer-key/$paperId'
+      preLoaderRoute: typeof AnswerKeyPaperIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/paper/$paperId': {
+      id: '/paper/$paperId'
+      path: '/paper/$paperId'
+      fullPath: '/paper/$paperId'
+      preLoaderRoute: typeof PaperPaperIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   DashboardRoute: DashboardRoute,
+  FacultiesRoute: FacultiesRoute,
+  ProgrammeRoute: ProgrammeRoute,
+  UniversitiesRoute: UniversitiesRoute,
+  AnswerKeyPaperIdRoute: AnswerKeyPaperIdRoute,
+  PaperPaperIdRoute: PaperPaperIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
