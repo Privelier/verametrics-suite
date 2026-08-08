@@ -1,0 +1,12 @@
+# Netlify build settings for this TanStack Start app.
+#
+# The nitro `netlify` preset emits:
+#   dist/                                  static client assets, plus _headers and _redirects
+#   .netlify/functions-internal/server/    the SSR handler, picked up by Netlify automatically
+#
+# It never creates dist/client, so publishing that path fails with
+# "Deploy directory 'dist/client' does not exist". Settings here take
+# precedence over the site's UI build settings.
+[build]
+  command = "bun run build"
+  publish = "dist"
